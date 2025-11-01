@@ -190,10 +190,10 @@
       .user-message { margin-left:auto; background: var(--user-bubble); border:1px solid rgba(57,255,20,0.35); box-shadow:0 8px 24px rgba(57,255,20,0.12); }
     </style>
   </head>
-  <body data-env="prod">
+  <body data-env="dev">
     <div class="frame">
       <header>
-        <div class="env-badge">PROD</div>
+        <div class="env-badge">DEV</div>
         <h1>Data Extremes AI Chat</h1>
       </header>
 
@@ -201,7 +201,7 @@
         <div class="chat">
           <div id="chat-messages" class="chat-messages">
             <div class="message assistant">
-              <p>Hey Michael — A|S online. How can I help today?</p>
+              <p>≈·`*•–[ A|S ]–•*'·≈ Hey Michael — A|S online. How can I help today?</p>
               <div class="meta">assistant · boot sequence complete</div>
             </div>
           </div>
@@ -249,7 +249,37 @@
       })();
     </script>
 
+    <!-- Auto-prefix assistant messages with A|S header -->
+    <script>
+      (function(){
+        const HEADER = "≈·`*•–[ A|S ]–•*'·≈ ";
+        function applyHeader(root){
+          const targets = root.querySelectorAll ? root.querySelectorAll('.assistant p, .assistant-message p') : [];
+          targets.forEach(p => {
+            const t = p.textContent || "";
+            if (!t.startsWith(HEADER)) p.textContent = HEADER + t;
+          });
+        }
+        const container = document.getElementById('chat-messages');
+        if (container){
+          applyHeader(container);
+          const mo = new MutationObserver(muts => {
+            for (const m of muts){
+              m.addedNodes && m.addedNodes.forEach(n => {
+                if (n.nodeType !== 1) return; // element only
+                if (n.matches && (n.matches('.assistant, .assistant-message') || n.querySelector('.assistant, .assistant-message'))){
+                  applyHeader(n);
+                }
+              });
+            }
+          });
+          mo.observe(container, { childList: true, subtree: true });
+        }
+      })();
+    </script>
+
     <!-- Chat app script -->
     <script src="chat.js"></script>
   </body>
 </html>
+
