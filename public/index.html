@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LLM Chat App · Axiom|Spectre Theme</title>
+    <title>Data Extremes AI Chat · Axiom|Spectre Theme</title>
     <style>
       /* =============================
          A|S Neon Dark Theme — Michael
@@ -158,13 +158,38 @@
       @media (prefers-reduced-motion: reduce) {
         body::before, .btn, header, .chat-wrap { animation: none !important; }
       }
+          /* ===== Env badge & per-env distinctions ===== */
+      .env-badge{
+        position:absolute; top:10px; right:12px; z-index:2;
+        padding:4px 10px; border-radius:999px; font:600 11px/1.6 ui-sans-serif;
+        letter-spacing:.08em; text-transform:uppercase; backdrop-filter:blur(6px);
+        border:1px solid rgba(255,255,255,.12); user-select:none;
+      }
+      body[data-env="prod"] .env-badge{ color:#051006; background:linear-gradient(180deg,#39ff14,#9bff7b); }
+      body[data-env="dev"]  .env-badge{ color:#13041a; background:linear-gradient(180deg,#a855f7,#ff9dff); }
+      body[data-env="lab"]  .env-badge{ color:#0b0f17; background:linear-gradient(180deg,#00e5ff,#7af0ff); }
+
+      /* Palette swaps (keeps your scheme but makes instances distinct) */
+      body[data-env="prod"]{ --glow:#39ff14; --violet:#a855f7; }
+      body[data-env="dev"] { --glow:#ff00ff; --violet:#c084fc; }
+      body[data-env="lab"] { --glow:#00e5ff; --violet:#7c3aed; }
+
+      /* Message chrome cues per env */
+      body[data-env="prod"] .assistant{ border-color:rgba(57,255,20,.35); }
+      body[data-env="dev"]  .assistant{ border-color:rgba(255,0,255,.35); }
+      body[data-env="lab"]  .assistant{ border-color:rgba(0,229,255,.35); }
+
+      /* Watermark label per env */
+      body[data-env="prod"] .watermark .sig::after{ content:"  •  Axiom|Spectre • PROD"; }
+      body[data-env="dev"]  .watermark .sig::after{ content:"  •  Axiom|Spectre • DEV"; }
+      body[data-env="lab"]  .watermark .sig::after{ content:"  •  Axiom|Spectre • LAB"; }
     </style>
   </head>
-  <body>
+  <body data-env="dev">
     <div class="frame">
       <header>
-        <h1>Cloudflare AI Chat</h1>
-        <p>Powered by Cloudflare Workers AI — Neon Dark Edition</p>
+        <div class="env-badge">DEV</div>
+        <h1>Data Extremes AI Chat</h1>
       </header>
 
       <div class="chat-wrap">
@@ -186,14 +211,40 @@
       </div>
 
       <footer>
-        <p>Cloudflare Workers AI Chat Template · <span style="color: var(--violet); font-weight:600;">A|S</span> remix · © 2025</p>
+        <p>Powered by Cloudflare Workers AI — Neon Dark Edition</p>
+        <p>Data Extremes AI Chat · <span style="color: var(--violet); font-weight:600;">A|S</span> remix · © 2025</p>
       </footer>
     </div>
 
     <!-- A|S watermark signature -->
     <div class="watermark"><span class="sig">A|S</span></div>
 
-    <!-- Chat app script (unchanged) -->
+    <!-- Environment controller (favicon + URL param) -->
+    <script>
+      (function(){
+        const params = new URLSearchParams(location.search);
+        const envParam = (params.get('env')||'').toLowerCase();
+        const allowed = ['prod','dev','lab'];
+        const env = allowed.includes(envParam) ? envParam : document.body.getAttribute('data-env') || 'dev';
+        document.body.setAttribute('data-env', env);
+        // Badge text
+        const badge = document.querySelector('.env-badge');
+        if (badge) badge.textContent = env.toUpperCase();
+        // Title suffix
+        document.title = `Data Extremes AI Chat · ${env.toUpperCase()}`;
+        // Favicon color per env
+        const colors = { prod:'#39ff14', dev:'#ff00ff', lab:'#00e5ff' };
+        const svg = encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
+          <rect width='64' height='64' rx='12' fill='black'/>
+          <text x='32' y='40' font-size='34' text-anchor='middle' font-family='Arial' fill='${colors[env]}'>AΣ</text>
+        </svg>`);
+        let link = document.querySelector('#favicon');
+        if(!link){ link = document.createElement('link'); link.id='favicon'; link.rel='icon'; document.head.appendChild(link); }
+        link.href = `data:image/svg+xml,${svg}`;
+      })();
+    </script>
+
+    <!-- Chat app script -->
     <script src="chat.js"></script>
   </body>
 </html>
